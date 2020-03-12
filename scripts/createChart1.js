@@ -8,7 +8,7 @@ const dataURL = "http://localhost:7071/api/GetData";
 
 function createChart1([labels,data]) {
     new Chartist.Line(
-        '#chart1', 
+        '#chart1',
         {
             labels: labels,
             series: data
@@ -24,5 +24,5 @@ function createChart1([labels,data]) {
 }
 
 async function main(){
-    await Promise.all([helper.callURL(labelsURL), helper.callURL(dataURL)]).then(createChart1).catch(log.logError);
+    await Promise.all([helper.postData(labelsURL), helper.postData(dataURL)]).then(createChart1).catch(log.logError);
 }
