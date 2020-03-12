@@ -10600,73 +10600,18 @@ return jQuery;
 
 },{}],2:[function(require,module,exports){
 var $ = require('jquery');
-var f_createChart1 = require('./createChart1');
+var createChart1 = require('./createChart1');
 
-$(document).ready(f_createChart1);
-/*
-const labelsURL = "http://localhost:7071/api/GetLabels";
-const dataURL = "http://localhost:7071/api/GetData";
+$(document).ready(createChart1);
 
-// According to (https://v8.dev/blog/fast-async), this is faster than promises, even though it does the same thing
-async function callURL(url) {
-    return $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "json",
-        success: function(data) {
-            return data
-        },
-        error: function(error) {
-            return error
-        }
-    })
-}
-async function main(){
-    await Promise.all([callURL(labelsURL), callURL(dataURL)]).then(createChart1).catch(logError);
-}
-
-// code shared by promises and async/await implementations
-function createChart1([labels,data]) {
-    new Chartist.Line(
-        '#chart1', 
-        {
-            labels: labels,
-            series: data
-        }, 
-        {
-            fullWidth: true,
-            chartPadding: 
-            {
-                right: 40
-            }
-        }
-    );
-}
-function logError(error){
-    console.error(`There was an error: ${error.status} (${error.statusText})`);
-}*/
 },{"./createChart1":3,"jquery":1}],3:[function(require,module,exports){
 module.exports = main;
 
-var $ = require('jquery');
+var helper = require('./helper');
+var log = require('./log')
 
 const labelsURL = "http://localhost:7071/api/GetLabels";
 const dataURL = "http://localhost:7071/api/GetData";
-
-// According to (https://v8.dev/blog/fast-async), this is faster than promises, even though it does the same thing
-async function callURL(url) {
-    return $.ajax({
-        type: "POST",
-        url: url,
-        dataType: "json",
-        success: function(data) {
-            return data
-        },
-        error: function(error) {
-            return error
-        }
-    })
-}
 
 function createChart1([labels,data]) {
     new Chartist.Line(
@@ -10685,12 +10630,37 @@ function createChart1([labels,data]) {
     );
 }
 
+async function main(){
+    await Promise.all([helper.callURL(labelsURL), helper.callURL(dataURL)]).then(createChart1).catch(log.logError);
+}
+},{"./helper":4,"./log":5}],4:[function(require,module,exports){
+module.exports.callURL = callURL;
+
+var $ = require('jquery');
+
+// According to (https://v8.dev/blog/fast-async), this is faster than promises, even though it does the same thing
+async function callURL(url) {
+    return $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "json",
+        success: function(data) {
+            return data
+        },
+        error: function(error) {
+            return error
+        }
+    })
+}
+},{"jquery":1}],5:[function(require,module,exports){
+module.exports.logError = logError;
+module.exports.logMsg = logMsg;
+
 function logError(error){
     console.error(`There was an error: ${error.status} (${error.statusText})`);
 }
 
-async function main(){
-    console.log("Test!");
-    await Promise.all([callURL(labelsURL), callURL(dataURL)]).then(createChart1).catch(logError);
+function logMsg(msg){
+    console.log(msg);
 }
-},{"jquery":1}]},{},[2]);
+},{}]},{},[2]);
