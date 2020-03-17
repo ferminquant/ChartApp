@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Microsoft.Data.SqlClient;
 
 namespace Company.Function
 {
@@ -19,8 +20,31 @@ namespace Company.Function
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function GetLabels processed a request.");
-            List<string> responseMessage = new List<string> {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
+            List<string> responseMessage = new List<string>();
 
+            var connectionString = Environment.GetEnvironmentVariable("SqlConnection");  
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                var text = @"select format(date, 'yyyyMM') as yearmonth
+                            from transactions
+                            group by format(date, 'yyyyMM')
+                            order by 1 " ;
+                using (SqlCommand cmd = new SqlCommand(text, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader != null)
+                        {
+                            while (reader.Read())
+                            {
+                                responseMessage.Add(reader["yearmonth"].ToString());
+                            }
+                        }
+                    }
+                }
+            }
+            
             return new OkObjectResult(responseMessage);
         }
     }
