@@ -98,6 +98,7 @@ namespace Company.Function
         private string getInsertSqls(){
             string value = "";
             foreach (Transaction i in transactions) {
+                // TODO: this code is vulnerable to SQL Injection.
                 value += $"INSERT INTO transactions (date,title,comment,main_category,sub_category,account,amount) VALUES ('{i.Date}','{i.Title.Replace("'","''")}','{i.Comment.Replace("'","''")}','{i.MainCategory.Replace("'","''")}','{i.Subcategory.Replace("'","''")}','{i.Account.Replace("'","''")}','{i.Amount}'); ";
             }
             return value;
