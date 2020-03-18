@@ -1,17 +1,22 @@
 # ChartApp
 
-Mar 13 2020
+A simple app to test charting with a javascript library that reads data using Azure serverless functions and serverless SQL DB.
 
-With this app I aim to use cloud technologies to upload a csv file and get simple graphs that will help me in my daily life. 
-I use Azure Serverless Functions as the backend, CosmosDB as the database, and a File Storage for uploading and triggering functions.
+Azure Functions:
+1) LoadCSVtoDb: it triggers with a CSV file from an Azure Blob storage, and saves it to SQL Database.
+2) GetLabels: gets the list of year/months with data
+3) GetData: gets the data with an accumulated sum per year/month
 
-I aim to make it as free as possible.
-Azure provides 1,000,000 function requests per month for free, has a free tier for CosmosDB, and offers for 12 months free 5GB in File Storage. When the 12 months are up, I expect little cost, since the storage would be an intermediate steps to upload a file, trigger a function that uses the file and then deletes it. 
+Your Azure account is expected to already have:
+* An SQL database with the transactions database
+* A Blob Storage account with a csv folder
 
-I expect some limitations. The file might be too big for a function to read, parse and send to CosmosDB, but for the files I intend to use it will probably not reach the 5 minutes of execution time for a serveless function. The file will be around 2 MB. I might eventually do a function to split the file into multiple pieces and call a different function to parse it multiple times. It is probably overkill for my intended use, so I will leave that for last.
-
-Mar 17 2020
-
-Gave up on using CosmosDb yesterday, because there is no simple way of deleting everything before loading. A delete stored procedure has to be executed multiple times before it deletes everything. Today I tried the Table Storage, and it has the same delete problem. You can delete the whole table, but it is not really deleted, it is queued to be deleted and you cannot use it or recreate it until that is done. So, delete and reinsert does not work. You can delete all rows, but again it is complex logic for a simple task. Will now try with a serverless Azure SQL Database.
-
-That worked, reading from it in Azure Functions, first graph works.
+The web app is simple, and I think I modularized it a bit too much for its purpose:
+* ChartApp.html: it shows a chart built from the javascript calls to the azure functions
+* ChartApp.js: simply calls createChart1.js. It would call createChart2.js as well, if it existed.
+* createChart1.js: calls Azure Functions to get the data for the chart and creates it. Uses helper.js to POST the functions, and log.js to log any info or errors.
+* helper.js: has a function to POST to a URL. A GET function would be placed here, but I didn't need any GET.
+* log.js: two simple functions to log errors of info. Not really needed, and maybe it would have been better to use an existing logging package instead of this.
+* bundle.js: I create this with browserify and watchify, to be able to code javascript with modules and avoid getting into callback hell.
+  * For manual building: browserify ChartApp.js -o bundle.js
+  * For automatic building: watchify ChartApp.js -o bundle.js
